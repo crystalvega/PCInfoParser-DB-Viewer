@@ -1,6 +1,7 @@
 from tkinter import *
-from tkinter import ttk, tix
+from tkinter import ttk
 from textwrap import wrap
+import XLSX
 
 import MySQL
 
@@ -32,6 +33,8 @@ def Start(Parsinginfo):
         else:
             combobox2['state'] = 'disabled'
             but['state'] = 'disabled'
+            but2['state'] = 'disabled'
+            btn_text2.set('Сохранить в XLSX')
             for heading in columns_heading1:
                 tree1.heading(heading[0], text=heading[1])
         
@@ -40,6 +43,8 @@ def Start(Parsinginfo):
         global second_table
         if str(var2.get()) != "":
             but['state'] = 'normal'
+            but2['state'] = 'normal'
+            btn_text2.set('Сохранить в XLSX')
             global strings1
             global strings2
             strings1 = MySQL.ParseTables(str(var1.get()), str(var2.get()),'all configuration')
@@ -56,6 +61,8 @@ def Start(Parsinginfo):
                     tree1.insert("", END, values=strs)
         else:
             but['state'] = 'disabled'
+            but2['state'] = 'disabled'
+            btn_text2.set('Сохранить в XLSX')
                 
     def callback3(*arg):
         global second_table
@@ -78,6 +85,12 @@ def Start(Parsinginfo):
                 for strs in strings2: 
                     tree1.insert("", END, values=strs)
                 btn_text.set("S.M.A.R.T")
+
+    def callback4(*arg):
+        if XLSX.Write(strings1, strings2, str(var1.get()), column_names2, column_names3, str(var2.get())):
+            btn_text2.set("Успешно сохранено!")
+        else:
+            btn_text2.set("Ошибка при сохранении!")
 
     var1 = StringVar()
     var2 = StringVar()
@@ -110,7 +123,9 @@ def Start(Parsinginfo):
     
     columns1 = []
     column_names1 = []
+    global column_names2
     column_names2 = ['Кабинет', 'LAN', 'ФИО', 'Монитор', 'Диагональ', 'Тип принтера', 'Модель принтера', 'ПК', 'Материнская плата', 'Процессор', 'Частота процессора', 'Баллы Passmark', 'Дата выпуска', 'Тип ОЗУ', 'ОЗУ, 1 Планка', 'ОЗУ, 2 Планка', 'ОЗУ, 3 Планка', 'ОЗУ, 4 Планка', 'Сокет', 'Диск 1', 'Состояние диска 1', 'Диск 2', 'Состояние диска 2', 'Диск 3', 'Состояние диска 3', 'Диск 4', 'Состояние диска 4', 'Операционная система', 'Антивирус', 'CPU Под замену', 'Все CPU под сокет', 'Дата создания']
+    global column_names3
     column_names3 = ['Кабинет', 'LAN', 'ФИО', 'Диск', 'Наименование', 'Прошивка', 'Размер', 'Время работы', 'Включён', 'Состояние', 'Температура', 'Дата создания']
     
     columns_heading1 = []
@@ -191,7 +206,7 @@ def Start(Parsinginfo):
         xid = tree1.identify_column(x)
         if iid:
             try:
-                item = tree1.item(iid)['values'][int(xid.replace('#',''))-1].rstrip()
+                item = str(tree1.item(iid)['values'][int(xid.replace('#',''))-1]).rstrip()
                 if len(item) > 35:
                     gen(item)
             except IndexError:
@@ -202,6 +217,12 @@ def Start(Parsinginfo):
     tree1.bind("<Motion>", textEvent)
     global last_focus
     last_focus = None
+    
+    btn_text2 = StringVar(value='Сохранить в XLSX')
+    
+    but2 = Button(textvariable=btn_text2, command=callback4, font='roboto 10')
+    but2.pack(fill=X)
+    but2['state'] = 'disabled'
 
     window.mainloop()
 
